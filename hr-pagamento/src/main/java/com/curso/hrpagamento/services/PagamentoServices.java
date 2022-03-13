@@ -10,10 +10,14 @@ import org.springframework.web.client.RestTemplate;
 
 import com.curso.hrpagamento.entities.Pagamento;
 import com.curso.hrpagamento.entities.Worker;
+import com.curso.hrpagamento.feignclients.WorkerFeignClient;
 
 @Service
 public class PagamentoServices {
 	
+	/*Comentado o exemplo usando o RestTemplate como forma de comunicação entre os projetos
+	 * Foi alterado para o uso do FEIGN
+	 * O workerHost também foi exlcuido do arquivo applicatio.properties
 	@Value("${hr-worker.host}")
 	private String workerHost;
 	
@@ -27,6 +31,15 @@ public class PagamentoServices {
 		
 		Worker worker =restTemplate.getForObject(workerHost+"/workers/{id}",Worker.class,uriVariables);
 		return new Pagamento(worker.getNome(),worker.getDiaria(),dias);
-	}
+	}*/
 
+	@Autowired
+	private WorkerFeignClient workerFeignClient;
+	
+	public Pagamento getPagamento(long workerId, int dias) {
+		
+		Worker worker = workerFeignClient.findById(workerId).getBody();
+		return new Pagamento(worker.getNome(),worker.getDiaria(),dias);
+	}
+	
 }
